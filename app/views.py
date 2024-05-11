@@ -27,7 +27,6 @@ def transfer_documents():
 
 @views.route('/accounts')
 def get_accounts():
-    # return render_template('accounts.html', accounts = get_accs()[:32])
     return jsonify({'accounts' : get_accs()})
 
 @views.route("/upload", methods=["POST"])
