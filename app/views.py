@@ -17,12 +17,18 @@ def create_account():
         'balance' : get_balance(addr)
     })
 
-@views.route('/get_accounts')
+@views.route('/mydocuments')
+def my_documents():
+    return render_template('my_documents.html')
+
+@views.route('/transferdocuments')
+def transfer_documents():
+    return render_template('transfer_documents.html')
+
+@views.route('/accounts')
 def get_accounts():
-    return jsonify({
-        'count' : len(get_accs()),
-        'accounts' : get_accs()
-    })
+    # return render_template('accounts.html', accounts = get_accs()[:32])
+    return jsonify({'accounts' : get_accs()})
 
 @views.route("/upload", methods=["POST"])
 def upload():

@@ -1,0 +1,67 @@
+<header>
+    <nav>
+        <ul>
+            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
+            <li><a href="/mydocuments" class="{{ 'active' if request.path == '/mydocuments' else '' }}">My Documents</a></li>
+            <li><a href="/transferdocuments" class="{{ 'active' if request.path == '/transferdocuments' else '' }}">Transfer Documents</a></li>
+            <!-- <li><a href="/accounts" class="{{ 'active' if request.path == '/accounts' else '' }}">Accounts</a></li> -->
+        </ul>
+    </nav>
+    <div class="connect-wallet-div">
+        <span id="walletAddress" style="display: none;"></span>
+        <button id='connectWallet' class="connect-wallet-button" onclick="">Connect Wallet</button>
+    </div>
+</header>
+
+<script type="text/javascript">
+    window.walletAddress = null 
+    const connectWallet = document.getElementById('connectWallet')
+    const walletAddress = document.getElementById('walletAddress')
+
+    function checkInstalled(){
+        if (typeof window.ethereum == 'undefined'){
+            walletAddress.innerText = 'Metamask is not installed.'
+            return False
+        }
+        connectWallet.addEventListener('click', connectWalletWithMetamask)
+    }
+
+    async function connectWalletWithMetamask(){
+        const accounts = await window.ethereum.request({method: 'eth_requestAccounts'})
+            .catch((e) => {
+                console.error(e.message)
+                return 
+            });
+
+        if (!accounts) { return }
+
+        window.walletAddress = accounts[0];
+        const shortenedAddress = window.walletAddress.slice(0, 4) + '...' + window.walletAddress.slice(-5);
+        walletAddress.innerText = shortenedAddress;
+        walletAddress.style.display = 'block';
+
+        connectWallet.innerText = 'Sign out';
+        connectWallet.removeEventListener('click', connectWalletWithMetamask);
+        setTimeout(() => {
+            connectWallet.addEventListener('click', signOutOfMetamask);
+        }, 200);
+    }
+
+    function signOutOfMetamask(){
+        window.walletAddress = null;
+        walletAddress.innerText = '';
+        walletAddress.style.display = 'none';
+
+        connectWallet.innerText = 'Connect wallet';
+
+        connectWallet.removeEventListener('click', signOutOfMetamask);
+        setTimeout(() => {
+            connectWallet.addEventListener('click', connectWalletWithMetamask);
+        }, 200);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        checkInstalled()
+    });
+
+</script>
