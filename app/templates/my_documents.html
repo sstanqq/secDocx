@@ -11,6 +11,59 @@
     <div class="container">
         <h1>My Documents</h1>
         <p>This is the content of the my documents page.</p>
+
+        <div class="drop-zone" id="drop-zone">
+            <span>Drag & Drop files here or click to upload</span>
+            <input type="file" id="file-input" style="display: none;">
+        </div>
     </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            uploadFile(fileInput.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragged');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragged');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                uploadFile(files[0]);
+            }
+            dropZone.classList.remove('dragged');
+        });
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Результат загрузки:', data);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки файла:', error);
+            });
+        }
+    </script>
 </body>
 </html>

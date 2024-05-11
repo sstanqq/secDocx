@@ -65,8 +65,8 @@
     window.addEventListener('DOMContentLoaded', () => {
     checkInstalled();
     const savedWalletAddress = sessionStorage.getItem('walletAddress');
-    const shortenedAddress = savedWalletAddress.slice(0, 4) + '...' + savedWalletAddress.slice(-5);
     if (savedWalletAddress) {
+        const shortenedAddress = savedWalletAddress.slice(0, 4) + '...' + savedWalletAddress.slice(-5);
         walletAddress.innerText = shortenedAddress;
         walletAddress.style.display = 'block';
 
