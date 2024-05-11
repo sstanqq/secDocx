@@ -4,9 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>secDocx dApp</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 <body>
-    <h1>Welcome to secDocx dApp</h1>
-    <p>This is a simple web application for decentralized document management.</p>
+    <div class="container">
+        <h1>Document flow</h1>
+
+        <!-- Ссылка для получения списка аккаунтов -->
+        <a href="/get_accounts">Получить список аккаунтов</a>
+
+        <!-- Форма для загрузки файла -->
+        <div class="file-upload-container" id="fileUploadContainer">
+            <label class="label-file" for="file">Drag file here or click to select</label>
+            <input type="file" id="file" class="input-file">
+            <span class="upload-icon">&#8673;</span>
+            <span class="upload-info">File formats: .pdf, .doc, .docx and .txt</span>
+        </div>
+        <br>
+        <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+            <input type="submit" value="Upload" class="input-submit">
+        </form>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const fileUploadContainer = document.getElementById('fileUploadContainer');
+
+        fileUploadContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadContainer.classList.add('dragover');
+        });
+
+        fileUploadContainer.addEventListener('dragleave', () => {
+            fileUploadContainer.classList.remove('dragover');
+        });
+
+        fileUploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadContainer.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+        });
+
+        fileUploadContainer.addEventListener('click', () => {
+            fileInput.click();
+        });
+    </script>
 </body>
 </html>

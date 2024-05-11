@@ -7,13 +7,10 @@
     This module provides functions for signing documents and verifying signatures.
 """
 import hashlib
-# from cryptography.utils import mul_points, add_points, read_file
-# from cryptography.key_generation import EdDSA_calculate_public_key, EdDSA_generate_private_key
-# from cryptography.constants import p, G, a, d, p
 
-from utils import mul_points, add_points, read_file
-from key_generation import EdDSA_calculate_public_key, EdDSA_generate_private_key
-from constants import p, G, a, d, p
+from crypto.utils import mul_points, add_points, read_file
+from crypto.key_generation import EdDSA_calculate_public_key, EdDSA_generate_private_key
+from crypto.constants import p, G, a, d, p
 
 def text_to_int(text : str) -> int:
     encoded_text = text.encode('utf-8')
