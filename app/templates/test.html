@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Documents</title>
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}"> -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #292929;
+            padding-bottom: .5rem;
+            font-size: 16px;
+        }
+
+        nav ul li a:hover {
+            color: #007bff;
+        }
+
+        nav ul li a.active {
+            border-bottom: 2px solid #007bff;
+        }
+
+        .connect-wallet-div {
+            display: flex;
+        }
+
+        .connect-wallet-div span {
+            margin: .5rem;
+        }
+
+        button.connect-wallet-button {
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        button.connect-wallet-button:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            margin: 1.5rem;
+            padding: 2rem; 
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .container h1 {
+            margin: 0 0 1rem;
+            padding: 0;
+            text-align: center;
+        }
+
+        .info-section {
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .info-section h2 {
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+
+        .info-section p {
+            margin-bottom: 1rem;
+        }
+
+        .info-section ul {
+            list-style-type: decimal;
+            margin-left: 20px;
+        }
+
+        .info-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-section img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    {% include "_header.html" %}
+    <div class="container">
+        <div class="info-section">
+            <h1>Добро пожаловать в secDox!</h1>
+            <p>secDox — это Web3-решение, предназначенное для управления децентрализованным документооборотом с использованием технологии блокчейн.<br>Авторизируйтесь, чтобы получить доступ к полному функционалу приложения.</p>
+            
+            <h2>Функциональные возможности</h2>
+            <p>Программное средство предоставляет следующие возможности:</p>
+            <ul>
+                <li>Хранение документов в децентрализованном хранилище.</li>
+                <li>Загрузка и удаление документов в системе.</li>
+                <li>Безопасный обмен документами с использованием технологии блокчейн.</li>
+                <li>Отслеживание статуса отправленных и полученных документов.</li>
+                <li>Сохранение и отклонение полученных документов.</li>
+                <li>Просмотр истории всех операций.</li>
+            </ul>
+            
+            <h2>Интеграция Metamask</h2>
+            <p>Для использования всех возможностей приложения, пожалуйста, подключите горячий кошелек Metamask. Это позволит вам:</p>
+            <ul>
+                <li>Авторизироваться в системе.</li>
+                <li>Подтверждать транзакции по управлению документами.</li>
+                <li>Использовать функционал программного средства.</li>
+            </ul>
+
+            <h2>Быстрый старт</h2>
+            <p>Следуйте этим шагам для начала работы:</p>
+            <ul>
+                <li>Установите и настройте Metamask. Загрузите расширение Metamask из официального магазина браузера и создайте новый кошелек или импортируйте существующий.</li>
+                <li>Подключите кошелек, используя кнопку выше. После настройки Metamask нажмите на кнопку "Подключить кошелек" на этой странице для авторизации.</li>
+                <li>После авторизации вы сможете загружать и обмениваться документами безопасно и эффективно. Перейдите в раздел обмена документами, выберите файл и отправьте его адресату.</li>
+                <li>Отслеживайте статус отправленных и полученных документов. В разделе "История операций" вы можете просматривать все свои транзакции.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

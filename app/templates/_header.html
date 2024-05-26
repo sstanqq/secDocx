@@ -1,15 +1,15 @@
 <header>
     <nav>
         <ul>
-            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
-            <li><a href="/mydocuments" class="{{ 'active' if request.path == '/mydocuments' else '' }}">My Documents</a></li>
-            <li><a href="/transferdocuments" class="{{ 'active' if request.path == '/transferdocuments' else '' }}">Transfer Documents</a></li>
+            <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Документы</a></li>
+            <li><a href="/transferdocuments" class="{{ 'active' if request.path == '/transferdocuments' else '' }}">Обмен</a></li>
+            <li><a href="/transactions" class="{{ 'active' if request.path == '/transactions' else '' }}">Транзакции</a></li>
             <!-- <li><a href="/accounts" class="{{ 'active' if request.path == '/accounts' else '' }}">Accounts</a></li> -->
         </ul>
     </nav>
     <div class="connect-wallet-div">
         <span id="walletAddress" style="display: none;"></span>
-        <button id='connectWallet' class="connect-wallet-button" onclick="">Connect Wallet</button>
+        <button id='connectWallet' class="connect-wallet-button" onclick="">Подключить кошелек</button>
     </div>
 </header>
 
@@ -41,7 +41,7 @@
         walletAddress.innerText = shortenedAddress;
         walletAddress.style.display = 'block';
 
-        connectWallet.innerText = 'Sign out';
+        connectWallet.innerText = 'Отключить';
         connectWallet.removeEventListener('click', connectWalletWithMetamask);
         setTimeout(() => {
             connectWallet.addEventListener('click', signOutOfMetamask);

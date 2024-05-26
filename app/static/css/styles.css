@@ -63,42 +63,6 @@ button.connect-wallet-button:hover {
     background-color: #0056b3;
 }
 
-/* #walletAddress {
-    display: flex;
-    align-items: center;
-    margin-right: 10px; /* добавляем отступ справа */
-/* } */
-
-/* #walletAddress span {
-    margin-right: 10px;
-} */ */
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-}
-  
-th, td {
-padding: 10px;
-text-align: center;
-border-bottom: 1px solid #ddd;
-}
-  
-th {
-background-color: #f0f0f0;
-color: #292929;
-}
-  
-  /* tbody {
-    font-size: 9px;
-  } */
-
-tbody tr:hover {
-background-color: #f9f9f9;
-}
-
 .copy-button {
     padding: 8px 16px;
     background-color: #f0f0f0;
@@ -141,4 +105,119 @@ background-color: #f9f9f9;
 
 .drop-zone:hover {
     background-color: #f9f9f9;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f0f0f0;
+    color: #292929;
+}
+
+tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.delete-document-btn,
+.download-document-btn {
+    padding: 8px;
+    margin:5px;
+    width: 83px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    display: inline-block;
+    text-decoration: none;
+}
+.delete-document-btn {
+    background-color: #ddd;
+}
+
+.delete-document-btn:hover {
+    background-color: #c82333; 
+}
+
+.download-document-btn {
+    background-color: #ddd; 
+}
+
+.download-document-btn:hover {
+    background-color: #0056b3; 
+}
+
+.send-document {
+    margin-bottom: 2rem;
+}
+
+.send-document h2 {
+    margin-bottom: 1rem;
+}
+
+.send-document label {
+    display: block;
+    margin-bottom: .5rem;
+    color: #292929;
+}
+
+.send-document select, .send-document input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.send-document button {
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.send-document button:hover {
+    background-color: #0056b3;
+}
+
+.status {
+    margin-top: 1rem;
+}
+
+.status label {
+    font-weight: bold;
+}
+
+.status span {
+    display: inline-block;
+    margin-left: 10px;
+    color: #007bff;
+}
+
+.save-button,
+.reject-button {
+    padding: 8px;
+    margin:5px;
+    width: 83px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    display: inline-block;
+    text-decoration: none;
 }

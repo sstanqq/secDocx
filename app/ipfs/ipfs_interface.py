@@ -52,8 +52,8 @@ def download_file_from_pinata(filepath, ipfs_hash, jwt_token=JWT_TOKEN):
         with open(filepath, "wb") as f:
             f.write(response.content)
 
-        return True
         print(f"Файл успешно скачан из IPFS и сохранен по пути: {filepath}")
+        return True
     else:
         try:
             error_json = response.json()
@@ -89,7 +89,6 @@ def test():
     jwt_token = os.getenv('PINATA_JWT_TOKEN') 
 
     if not check_pinata_connection(jwt_token):
-        print('NO!!!')
         return False 
     
     # response = upload_file_to_pinata(file_path, jwt_token)

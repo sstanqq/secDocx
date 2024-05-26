@@ -8,19 +8,47 @@ views = Blueprint('main', __name__)
 
 @views.route('/')
 def index():
-    return render_template('index.html')
+    documents = [
+        {'name': 'Document2.pdf', 'hash': 'QmZc3...E7X5', 'created_at': '14.05.2024 12:43:10'},
+        {'name': 'Секретно2.pdf', 'hash': 'QmAd4...F6W6', 'created_at': '14.05.2024 12:41:35'},
+        {'name': 'Реферат.docx', 'hash': 'QmBe5...G5V7', 'created_at': '03.02.2023 05:12:19'},
+        {'name': 'Доклад.docx', 'hash': 'QmCf6...H4U8', 'created_at': '16.03.2023 13:27:05'},
+        {'name': 'ТЭО_Станкевич.docx', 'hash': 'QmDg7...I3T9', 'created_at': '05.04.2024 15:34:12'},
+        {'name': 'Отчет.docx', 'hash': 'QmEh8...J2S0', 'created_at': '01.12.2022 22:01:13'},
+        {'name': 'Алгоритм_поиска_А1.pdf', 'hash': 'QmFi9...K1R1', 'created_at': '12.05.2024 11:02:56'},
+        {'name': 'Алгоритм_сохр_А1.pdf', 'hash': 'QmGj0...L0Q2', 'created_at': '12.05.2024 10:20:15'},
+        {'name': 'Алгоритм_автор_А1.pdf', 'hash': 'QmHk1...M9P3', 'created_at': '12.05.2024 09:10:31'},
+        {'name': 'ПЗ_Станкевич.docx', 'hash': 'QmIl2...N8O4', 'created_at': '11.04.2024 17:18:03'},
+    ]
+
+    return render_template('test.html')
+    # return render_template('my_documents.html', documents=documents)
 
 @views.route('/mydocuments')
 def my_documents():
-    return render_template('my_documents.html')
+    documents = [
+        {'name': 'Document2.pdf', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
+        {'name': 'Секретно2.pdf', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
+        {'name': 'Реферат.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'Доклад.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'ТЭО_Станкевич.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'Отчет.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'Алгоритм_поиска_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'Алгоритм_сохр_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'Алгоритм_автор_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
+        {'name': 'ПЗ_Станкевич.docx', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
+    ]
+
+    return render_template('my_documents.html', documents=documents)
 
 @views.route('/transferdocuments')
 def transfer_documents():
     return render_template('transfer_documents.html')
 
-@views.route('/accounts')
-def get_accounts():
-    return jsonify({'accounts' : get_accs()})
+@views.route('/transactions')
+def transactions():
+    return render_template('index.html')
+
 
 @views.route("/upload", methods=["POST"])
 def upload_document():

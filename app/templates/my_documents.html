@@ -9,13 +9,43 @@
 <body>
     {% include "_header.html" %}
     <div class="container">
-        <h1>My Documents</h1>
-        <p>This is the content of the my documents page.</p>
+        <h1>Загрузить документы</h1>
+        <!-- <p>This is the content of the my documents page.</p> -->
 
         <div class="drop-zone" id="drop-zone">
-            <span>Drag & Drop files here or click to upload</span>
+            <span>Перетащите документы сюда или кликните, чтобы загрузить</span>
             <input type="file" id="file-input" style="display: none;">
         </div>
+    </div>
+    <div class="container">
+        <table>
+            <h1>Мои документы</h1>
+            <thead>
+                <tr>
+                    <th>Имя файла</th>
+                    <th>Хеш</th>
+                    <th>Время создания</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td>{{ document.name }}</td>
+                    <td>{{ document.hash }}</td>
+                    <td>{{ document.created_at }}</td>
+                    <td>
+                        <form method="POST" action="/delete/{{ document.hash }}">
+                            <button type="submit" class="delete-document-btn">Удалить</button>
+                        </form>
+                        <form method="POST" action="/download/{{ document.hash }}">
+                            <button type="submit" class="download-document-btn">Сохранить</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <script>
