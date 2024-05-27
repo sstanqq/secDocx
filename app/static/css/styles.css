@@ -221,3 +221,58 @@ tbody tr:hover {
     display: inline-block;
     text-decoration: none;
 }
+
+button#upload-doc-btn {
+    padding: 8px;
+    margin-top: 10px;
+    color: #fff;
+    background-color: #007bff; 
+    transition: background-color 0.3s ease-in-out;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+/* File info div */
+.file-info-div {
+    margin-top: 10px;
+    padding: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+}
+
+button#upload-doc-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Info section */
+.info-section {
+    text-align: left;
+    margin-top: 2rem;
+}
+
+.info-section h2 {
+    margin-bottom: 1rem;
+    color: #007bff;
+}
+
+.info-section p {
+    margin-bottom: 1rem;
+}
+
+.info-section ul {
+    list-style-type: decimal;
+    margin-left: 20px;
+}
+
+.info-section li {
+    margin-bottom: 0.5rem;
+}
+
+.info-section img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

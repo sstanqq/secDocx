@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Documents</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <div class="container">
+        <div class="send-document">
+            <h1>Выбор документа и адресата для отправки</h2>
+            <label for="document-select">Выберите документ:</label>
+            <select id="document-select">
+                <option value="Document1.pdf">Document1.pdf</option>
+                <option value="Document2.pdf">Document2.pdf</option>
+                <option value="Секретно.pdf">Секретно.pdf</option>
+                <option value="Реферат.docx">Реферат.docx</option>
+                <option value="Доклад.docx">Доклад.docx</option>
+            </select>
+            <br>
+            <label for="address-input">Адрес:</label>
+            <input type="text" id="address-input" placeholder="Введите адрес Ethereum">
+
+            <button id="send-button">Отправить</button>
+
+            <div class="status">
+                <label for="status-display">Статус:</label>
+                <span id="status-display">Ожидание отправки...</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="received-documents">
+            <h1>Полученные документы</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя файла</th>
+                        <th>Адрес отправителя</th>
+                        <th>Хеш</th>
+                        <th>Время отправления</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,7 +4,6 @@
             <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Документы</a></li>
             <li><a href="/transferdocuments" class="{{ 'active' if request.path == '/transferdocuments' else '' }}">Обмен</a></li>
             <li><a href="/transactions" class="{{ 'active' if request.path == '/transactions' else '' }}">Транзакции</a></li>
-            <!-- <li><a href="/accounts" class="{{ 'active' if request.path == '/accounts' else '' }}">Accounts</a></li> -->
         </ul>
     </nav>
     <div class="connect-wallet-div">
@@ -14,26 +13,26 @@
 </header>
 
 <script type="text/javascript">
-    window.walletAddress = null 
-    const connectWallet = document.getElementById('connectWallet')
-    const walletAddress = document.getElementById('walletAddress')
+    window.walletAddress = null;
+    const connectWallet = document.getElementById('connectWallet');
+    const walletAddress = document.getElementById('walletAddress');
 
-    function checkInstalled(){
-        if (typeof window.ethereum == 'undefined'){
-            walletAddress.innerText = 'Metamask is not installed.'
-            return False
+    function checkInstalled() {
+        if (typeof window.ethereum == 'undefined') {
+            walletAddress.innerText = 'Metamask не установлен.';
+            return false;
         }
-        connectWallet.addEventListener('click', connectWalletWithMetamask)
+        connectWallet.addEventListener('click', connectWalletWithMetamask);
     }
 
-    async function connectWalletWithMetamask(){
-        const accounts = await window.ethereum.request({method: 'eth_requestAccounts'})
+    async function connectWalletWithMetamask() {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
             .catch((e) => {
-                console.error(e.message)
-                return 
+                console.error(e.message);
+                return;
             });
 
-        if (!accounts) { return }
+        if (!accounts) { return; }
 
         window.walletAddress = accounts[0];
         sessionStorage.setItem('walletAddress', accounts[0]);
@@ -46,36 +45,70 @@
         setTimeout(() => {
             connectWallet.addEventListener('click', signOutOfMetamask);
         }, 200);
+
+        await sendWalletAddressToServer(accounts[0]);
+
+        window.location.href = '/';""
     }
 
-    function signOutOfMetamask(){
+    async function sendWalletAddressToServer(walletAddress) {
+        try {
+            const response = await fetch('/connectwallet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ walletAddress: walletAddress })
+            });
+
+            const data = await response.json();
+            console.log('Wallet address saved on server:', data);
+        } catch (error) {
+            console.error('Error saving wallet address on server:', error);
+        }
+    }
+
+    function signOutOfMetamask() {
         window.walletAddress = null;
         sessionStorage.removeItem('walletAddress');
         walletAddress.innerText = '';
         walletAddress.style.display = 'none';
 
-        connectWallet.innerText = 'Connect wallet';
-        
+        connectWallet.innerText = 'Подключить кошелек';
+
         connectWallet.removeEventListener('click', signOutOfMetamask);
         setTimeout(() => {
             connectWallet.addEventListener('click', connectWalletWithMetamask);
         }, 200);
+
+        fetch('/disconnectwallet', {
+        method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Wallet disconnected:', data);
+            // Дополнительные действия, если нужно
+        })
+        .catch(error => {
+            console.error('Error disconnecting wallet:', error);
+        });
+
+        window.location.href = '/';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-    checkInstalled();
-    const savedWalletAddress = sessionStorage.getItem('walletAddress');
-    if (savedWalletAddress) {
-        const shortenedAddress = savedWalletAddress.slice(0, 4) + '...' + savedWalletAddress.slice(-5);
-        walletAddress.innerText = shortenedAddress;
-        walletAddress.style.display = 'block';
+        checkInstalled();
+        const savedWalletAddress = sessionStorage.getItem('walletAddress');
+        if (savedWalletAddress) {
+            const shortenedAddress = savedWalletAddress.slice(0, 4) + '...' + savedWalletAddress.slice(-5);
+            walletAddress.innerText = shortenedAddress;
+            walletAddress.style.display = 'block';
 
-        connectWallet.innerText = 'Sign out';
-        connectWallet.removeEventListener('click', connectWalletWithMetamask);
-        setTimeout(() => {
-            connectWallet.addEventListener('click', signOutOfMetamask);
-        }, 200);
-    }
-});
-
+            connectWallet.innerText = 'Отключить';
+            connectWallet.removeEventListener('click', connectWalletWithMetamask);
+            setTimeout(() => {
+                connectWallet.addEventListener('click', signOutOfMetamask);
+            }, 200);
+        }
+    });
 </script>

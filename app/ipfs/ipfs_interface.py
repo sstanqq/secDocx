@@ -5,7 +5,7 @@ import os
 load_dotenv()
 JWT_TOKEN = os.getenv('PINATA_JWT_TOKEN') 
 
-def check_pinata_connection(jwt_token):
+def check_pinata_connection(jwt_token=JWT_TOKEN):
     url = "https://api.pinata.cloud/data/testAuthentication"
 
     headers = {"Authorization": f"Bearer {jwt_token}"}
@@ -81,7 +81,6 @@ def delete_file_from_pinate(ipfs_hash, jwt_token=JWT_TOKEN):
         except ValueError:  
             print("Произошла ошибка при удалении файла в IPFS:", response.text)
         return None
-
 
 def test():
     file_path = 'temp/av.jpg'

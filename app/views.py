@@ -1,78 +1,118 @@
+from flask import session, redirect
 from flask import Blueprint, render_template, request, jsonify
-from app.web3.web3_interface import get_balance, get_accs
+from app.web3.web3_interface import check_connection
 from app.ipfs.ipfs_interface import check_pinata_connection, upload_file_to_pinata, \
                                     download_file_from_pinata, delete_file_from_pinate
+
+from app.ipfs.utils import generate_hash
+
 import os
 
 views = Blueprint('main', __name__)
 
 @views.route('/')
 def index():
-    documents = [
-        {'name': 'Document2.pdf', 'hash': 'QmZc3...E7X5', 'created_at': '14.05.2024 12:43:10'},
-        {'name': 'Секретно2.pdf', 'hash': 'QmAd4...F6W6', 'created_at': '14.05.2024 12:41:35'},
-        {'name': 'Реферат.docx', 'hash': 'QmBe5...G5V7', 'created_at': '03.02.2023 05:12:19'},
-        {'name': 'Доклад.docx', 'hash': 'QmCf6...H4U8', 'created_at': '16.03.2023 13:27:05'},
-        {'name': 'ТЭО_Станкевич.docx', 'hash': 'QmDg7...I3T9', 'created_at': '05.04.2024 15:34:12'},
-        {'name': 'Отчет.docx', 'hash': 'QmEh8...J2S0', 'created_at': '01.12.2022 22:01:13'},
-        {'name': 'Алгоритм_поиска_А1.pdf', 'hash': 'QmFi9...K1R1', 'created_at': '12.05.2024 11:02:56'},
-        {'name': 'Алгоритм_сохр_А1.pdf', 'hash': 'QmGj0...L0Q2', 'created_at': '12.05.2024 10:20:15'},
-        {'name': 'Алгоритм_автор_А1.pdf', 'hash': 'QmHk1...M9P3', 'created_at': '12.05.2024 09:10:31'},
-        {'name': 'ПЗ_Станкевич.docx', 'hash': 'QmIl2...N8O4', 'created_at': '11.04.2024 17:18:03'},
-    ]
+    wallet_address = session.get('walletAddress')
+    print(f'Wallet address: {wallet_address}')
+    if not wallet_address:
+        return render_template('index.html')
+    
+    return render_template('documents.html')
 
-    return render_template('test.html')
-    # return render_template('my_documents.html', documents=documents)
-
-@views.route('/mydocuments')
-def my_documents():
-    documents = [
-        {'name': 'Document2.pdf', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
-        {'name': 'Секретно2.pdf', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
-        {'name': 'Реферат.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'Доклад.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'ТЭО_Станкевич.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'Отчет.docx', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'Алгоритм_поиска_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'Алгоритм_сохр_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'Алгоритм_автор_А1.pdf', 'hash': '67890', 'created_at': '2024-05-16 12:00:00'},
-        {'name': 'ПЗ_Станкевич.docx', 'hash': '12345', 'created_at': '2024-05-15 12:00:00'},
-    ]
-
-    return render_template('my_documents.html', documents=documents)
+# Connect & disconnect wallet routes
+@views.route('/connectwallet', methods=['POST'])
+def connect_wallet():
+    try:
+        data = request.get_json()  
+        wallet_address = data.get('walletAddress')
+        print(f'Received wallet address: {wallet_address}')
+        if wallet_address:
+            session['walletAddress'] = wallet_address
+            return jsonify({'message': 'Wallet address saved'}), 200
+        return jsonify({'error': 'No wallet address provided'}), 400
+    except Exception as e:
+        print(f'Error saving wallet address: {e}')
+        return jsonify({'error': str(e)}), 500
+    
+@views.route('/disconnectwallet', methods=['POST'])
+def disconnect_wallet():
+    if 'walletAddress' in session:
+        del session['walletAddress']
+        return jsonify({'message': 'Wallet disconnected'}), 200
+    return jsonify({'error': 'No wallet address in session'}), 400
 
 @views.route('/transferdocuments')
 def transfer_documents():
-    return render_template('transfer_documents.html')
+    # public key check
+    wallet_address = session.get('walletAddress')
+    if not wallet_address:
+        return redirect('/')
+    
+    return render_template('transfer.html')
 
 @views.route('/transactions')
 def transactions():
-    return render_template('index.html')
+    # public key check
+    wallet_address = session.get('walletAddress')
+    if not wallet_address:
+        return redirect('/')
+
+    return render_template('transactions.html')
 
 
 @views.route("/upload", methods=["POST"])
 def upload_document():
+    # Check Pinata API connection
+    if not check_pinata_connection():
+        return jsonify({'error': 'Failed to connect to Pinata'}), 500
+
     if request.method == "POST":
         file = request.files["file"]
 
+        # Save file to temp dir
         temp_dir = 'temp'
         os.makedirs(temp_dir, exist_ok=True)
         file_path = os.path.join(temp_dir, file.filename)
         file.save(file_path)
 
+        # Calculate hash 
+        temp_hash = generate_hash(file_path)
+
+        # Upload to pinata
         response = upload_file_to_pinata(file_path)
-        print(response)
+
+        ipfshash = response['IpfsHash']
+        timestamp = response['Timestamp']
+
+        # Uncom then 
+        # if temp_hash != ipfshash:
+        #     return jsonify({'error': 'file integrity error'}), 500
+
+        print(f'ipfs hash: {ipfshash}')
+        print(f'timestamp: {timestamp}')
 
         os.remove(file_path)
 
-        return jsonify({'result' : response})
+        return jsonify({'result': response})
     
 @views.route("/download", methods=["POST"])
 def download_document():
+    # Check Pinata API connection
+    if not check_pinata_connection():
+        return jsonify({'error': 'Failed to connect to Pinata'}), 500 
+
     if request.method == "POST":
         pass 
 
 @views.route("/delete", methods=["POST"])
 def delete_document():
+    # Check Pinata API connection
+    if not check_pinata_connection():
+        return jsonify({'error': 'Failed to connect to Pinata'}), 500 
+
     if request.method == "POST":
         pass  
+
+@views.route("/send", methods=["POST"])
+def send_document():
+    pass 
