@@ -63,7 +63,7 @@ def download_file_from_pinata(filepath, ipfs_hash, jwt_token=JWT_TOKEN):
 
         return None 
 
-def delete_file_from_pinate(ipfs_hash, jwt_token=JWT_TOKEN):
+def delete_file_from_pinata(ipfs_hash, jwt_token=JWT_TOKEN):
     url = f"https://api.pinata.cloud/pinning/unpin/{ipfs_hash}"
     headers = {
         "Authorization": f"Bearer {jwt_token}"

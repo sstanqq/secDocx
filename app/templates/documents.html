@@ -33,17 +33,13 @@
             </thead>
             <tbody>
                 {% for document in documents %}
-                <tr>
+                <tr id="doc-{{ document.hash }}">
                     <td>{{ document.name }}</td>
-                    <td>{{ document.hash }}</td>
-                    <td>{{ document.created_at }}</td>
+                    <td style="cursor: pointer;">{{ document.hash }}</td>
+                    <td>{{ document.timestamp }}</td>
                     <td>
-                        <form method="POST" action="/delete/{{ document.hash }}">
-                            <button type="submit" class="delete-document-btn">Удалить</button>
-                        </form>
-                        <form method="POST" action="/download/{{ document.hash }}">
-                            <button type="submit" class="download-document-btn">Сохранить</button>
-                        </form>
+                        <button class="delete-document-btn" data-hash="{{ document.hash }}">Удалить</button>
+                        <button class="download-document-btn" data-hash="{{ document.hash }}">Сохранить</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -115,14 +111,98 @@
             .then(data => {
                 console.log('Результат загрузки:', data);
                 
-                setTimeout(() => {
-                    fileInfoDiv.style.display = 'none';
-                }, 3000);
+                const fileInfoDiv = document.getElementById('file-info-div');
+                if (fileInfoDiv) {
+                    fileInfoDiv.classList.add('fade-out');
+                    setTimeout(() => {
+                        fileInfoDiv.style.display = 'none';
+                    }, 1000);
+                }
+                window.location.href = '/';
             })
             .catch(error => {
                 console.error('Ошибка загрузки файла:', error);
             });
         }
+
+        document.querySelectorAll('.delete-document-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const hash = event.target.dataset.hash;
+                const row = document.getElementById(`doc-${hash}`);
+
+                try {
+                    const response = await fetch('/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ file_hash: hash })
+                    });
+                    
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log(result.message);
+                        row.remove();
+                    } else {
+                        console.error(result.error);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при удалении файла:', error);
+                }
+            });
+        });
+
+        document.querySelectorAll('.download-document-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const hash = event.target.dataset.hash;
+
+                try {
+                    const response = await fetch('/download/' + hash, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ file_hash: hash })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        const selectedPath = await getSaveFilePath();
+
+                        await fetch('/download/' + hash, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ file_hash: hash, file_path: selectedPath })
+                        });
+                    } else {
+                        console.error('Ошибка при скачивании файла:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Произошла ошибка:', error);
+                }
+            });
+        });
+
+        async function getSaveFilePath() {
+            return new Promise((resolve, reject) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.setAttribute('webkitdirectory', '');
+                input.setAttribute('directory', '');
+                input.addEventListener('change', () => {
+                    if (input.files.length > 0) {
+                        resolve(input.files[0].path);
+                    } else {
+                        reject('Путь к файлу не выбран');
+                    }
+                });
+                input.click();
+            });
+        }
+
     </script>
 </body>
 </html>

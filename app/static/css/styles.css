@@ -122,6 +122,7 @@ th, td {
 th {
     background-color: #f0f0f0;
     color: #292929;
+    cursor: pointer;
 }
 
 tbody tr:hover {
@@ -239,6 +240,12 @@ button#upload-doc-btn {
     padding: 10px;
     border: 2px dashed #ccc;
     border-radius: 5px;
+
+    transition: opacity 1s ease-in-out;
+    opacity: 1;
+}
+.file-info-div.fade-out{
+    opacity: 0;
 }
 
 button#upload-doc-btn:hover {
@@ -276,3 +283,5 @@ button#upload-doc-btn:hover {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+/*  */

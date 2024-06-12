@@ -12,6 +12,12 @@ myapp = Flask(__name__,
 
 myapp.secret_key = os.getenv('FLASK_SEC_TOKEN') 
 
+@myapp.template_filter('shorten')
+def shorten_filter(s):
+    if len(s) <= 9:
+        return s
+    return s[:4] + '...' + s[-5:]
+
 myapp.register_blueprint(views, url_prefix='/')
 
 print(f'Connection to Ganache: {check_connection()}\n')
