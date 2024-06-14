@@ -49,7 +49,7 @@ class DocumentStorageClient:
                 'recipient' : doc[3],
                 'tr_type' : doc[4],
                 'isSend' : doc[5],
-                'timestamp': datetime.fromtimestamp(doc[6], tz=timezone.utc).strftime('%d.%m.%Y %H:%M:%S'),
+                'timestamp': datetime.fromtimestamp(doc[6], tz=timezone.utc).strftime('%d.%m.%Y %H:%M'),
                 'size' : doc[7]
 
             }
@@ -68,10 +68,28 @@ class DocumentStorageClient:
                 'recipient' : doc[3],
                 'tr_type' : doc[4],
                 'isSend' : doc[5],
-                'timestamp': datetime.fromtimestamp(doc[6], tz=timezone.utc).strftime('%d.%m.%Y %H:%M:%S'),
+                'timestamp': datetime.fromtimestamp(doc[6], tz=timezone.utc).strftime('%d.%m.%Y %H:%M'),
                 'size' : doc[7]
 
             }
             documents.append(document)
 
         return documents
+
+    def get_all_user_transactions(self, address):
+        tr_type = {1: 'Загрузка', 2: 'Удаление', 3: 'Сохранение', 4: 'Отправка'}
+
+        tx_list =  self.contract.functions.getAllUserTransactions().call({'from': address})
+        transactions = []
+        for tx in tx_list:
+            transaction = {
+                'name' : tx[0],
+                'hash' : tx[1],
+                'sender' : tx[2],
+                'recipient' : tx[3] if tx[4] == 4 else '',
+                'tr_type' : tr_type[tx[4]],
+                'status' : 'Выполнен' if tx[6] else 'Ошибка',
+                'timestamp': datetime.fromtimestamp(tx[5], tz=timezone.utc).strftime('%d.%m.%Y %H:%M:%S')
+            }
+            transactions.append(transaction)
+        return transactions

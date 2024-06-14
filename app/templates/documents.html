@@ -18,24 +18,42 @@
         <div class="file-info-div" id="file-info-div" style="display: none;">
             <div id="file-info" style="margin-top: 20px;"></div>
             <button id="upload-doc-btn">Загрузить</button>
+            <div class="loader" id="loader" style="display: none;"></div>
         </div>
     </div>
-    <div class="container">
+    <div class="container" id="documents-container" {% if not documents %} style="display: none;" {% endif %}>
         <table>
             <h1>Мои документы</h1>
             <thead>
                 <tr>
+                    <th></th>
                     <th>Имя файла</th>
                     <th>Хеш</th>
-                    <th>Время создания</th>
+                    <th>Размер</th>
+                    <th>Дата</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for document in documents %}
                 <tr id="doc-{{ document.hash }}">
+                    <td>{% if document.name.split('.')[-1].lower() == 'pdf' %}
+                        <img src="{{ url_for('static', filename='assets/pdf.png') }}" alt="PDF" width="32" height="32">
+                        {% elif document.name.split('.')[-1].lower() == 'png' %}
+                        <img src="{{ url_for('static', filename='assets/png.png') }}" alt="PNG" width="32" height="32">
+                        {% elif document.name.split('.')[-1].lower() == 'docs' or document.name.split('.')[-1].lower() == 'docx' %}
+                        <img src="{{ url_for('static', filename='assets/docs.png') }}" alt="Docs" width="32" height="32">
+                        {% elif document.name.split('.')[-1].lower() == 'txt' %}
+                        <img src="{{ url_for('static', filename='assets/txt.png') }}" alt="TXT" width="32" height="32">
+                        {% elif document.name.split('.')[-1].lower() == 'xls' %}
+                        <img src="{{ url_for('static', filename='assets/xls.png') }}" alt="XLS" width="32" height="32">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='assets/default.png') }}" alt="Default" width="32" height="32">
+                        {% endif %}
+                    </td>
                     <td>{{ document.name }}</td>
                     <td style="cursor: pointer;">{{ document.hash }}</td>
+                    <td>{{ document.size | format_size }}</td>
                     <td>{{ document.timestamp }}</td>
                     <td>
                         <button class="delete-document-btn" data-hash="{{ document.hash }}">Удалить</button>
@@ -45,6 +63,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="loader delete-loader" id="delete-loader" style="display: none;"></div>
     </div>
 
     <script>
@@ -103,6 +122,9 @@
             const formData = new FormData();
             formData.append('file', file);
 
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block'; // Показать анимацию загрузки
+
             fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -110,45 +132,124 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Результат загрузки:', data);
-                
+
                 const fileInfoDiv = document.getElementById('file-info-div');
                 if (fileInfoDiv) {
                     fileInfoDiv.classList.add('fade-out');
                     setTimeout(() => {
                         fileInfoDiv.style.display = 'none';
+                        addDocumentToTable(data);
                     }, 1000);
                 }
-                window.location.href = '/';
             })
             .catch(error => {
                 console.error('Ошибка загрузки файла:', error);
+            })
+            .finally(() => {
+                loader.style.display = 'none'; // Скрыть анимацию загрузки
             });
+        }
+
+        function formatSize(fileSize) {
+            const units = ['', 'КБ', 'МБ', 'ГБ', 'ТБ'];
+            let i = 0;
+            while (fileSize >= 1024 && i < units.length - 1) {
+                fileSize /= 1024;
+                i++;
+            }
+            return `${fileSize.toFixed(2)} ${units[i]}`;
+        }
+
+        function addDocumentToTable(data) {
+            const documentsContainer = document.getElementById('documents-container');
+            const documentsTable = document.querySelector('table tbody');
+            
+            documentsContainer.style.display = 'block';
+
+            const formattedSize = formatSize(data.size);
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><img src="${getIconUrl(data.name.split('.').pop().toLowerCase())}" alt="${data.name}" width="32" height="32"></td>
+                <td>${data.name}</td>
+                <td>${data.hash}</td>
+                <td>${formattedSize}</td>
+                <td>${data.timestamp}</td>
+                <td>
+                    <button class="delete-document-btn" data-hash="${data.hash}">Удалить</button>
+                    <button class="download-document-btn" data-hash="${data.hash}">Сохранить</button>
+                </td>
+            `;
+            
+            documentsTable.appendChild(newRow);
+            newRow.classList.add('fade-in'); // Добавляем класс для анимации появления
+
+            newRow.querySelector('.delete-document-btn').addEventListener('click', async (event) => {
+                await deleteDocument(event.target.dataset.hash, newRow);
+            });
+        }
+
+        function getIconUrl(fileType) {
+            switch (fileType) {
+                case 'pdf':
+                    return '/static/assets/pdf.png';
+                case 'png':
+                    return '/static/assets/png.png';
+                case 'docs':
+                    return '/static/assets/docs.png';
+                case 'txt':
+                    return '/static/assets/txt.png';
+                case 'xls':
+                    return '/static/assets/xls.png';
+                default:
+                    return '/static/assets/default.png';
+            }
+        }
+
+        async function deleteDocument(hash, row) {
+            const deleteLoader = document.getElementById('delete-loader');
+            deleteLoader.style.display = 'block';
+
+            try {
+                const response = await fetch('/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ file_hash: hash })
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    console.log(result.message);
+                    row.classList.add('fade-out');
+                    setTimeout(() => {
+                        row.remove();
+                        checkIfDocumentsEmpty();
+                    }, 500);
+                } else {
+                    console.error(result.error);
+                }
+            } catch (error) {
+                console.error('Ошибка при удалении файла:', error);
+            } finally {
+                deleteLoader.style.display = 'none';
+            }
+        }
+
+        function checkIfDocumentsEmpty() {
+            const documentsTable = document.querySelector('table tbody');
+            if (documentsTable.children.length === 0) {
+                const documentsContainer = document.getElementById('documents-container');
+                documentsContainer.style.display = 'none';
+            }
         }
 
         document.querySelectorAll('.delete-document-btn').forEach(button => {
             button.addEventListener('click', async (event) => {
                 const hash = event.target.dataset.hash;
                 const row = document.getElementById(`doc-${hash}`);
-
-                try {
-                    const response = await fetch('/delete', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ file_hash: hash })
-                    });
-                    
-                    const result = await response.json();
-                    if (response.ok) {
-                        console.log(result.message);
-                        row.remove();
-                    } else {
-                        console.error(result.error);
-                    }
-                } catch (error) {
-                    console.error('Ошибка при удалении файла:', error);
-                }
+                await deleteDocument(hash, row);
             });
         });
 
@@ -202,7 +303,6 @@
                 input.click();
             });
         }
-
     </script>
 </body>
 </html>

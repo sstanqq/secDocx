@@ -1,5 +1,6 @@
 from flask import session, redirect, Blueprint, render_template, request, jsonify
 from web3 import Web3
+import time
 from datetime import datetime, timezone
 import os
 import json
@@ -12,7 +13,7 @@ from app.web3.web3_interface import check_connection
 views = Blueprint('main', __name__)
 
 # Инициализация контракта
-contract_address = "0xAC4346A6ae79d0569054f8b863c2ba55BFF4871d"  # Замените на адрес вашего смарт-контракта
+contract_address = "0x4356A5717BAE794B7C1bd6a05C8Ff55f164855e1"  # Замените на адрес вашего смарт-контракта
 abi_file_path = "app/web3/abi.json"  # Путь к файлу ABI вашего смарт-контракта
 
 with open(abi_file_path, 'r') as f:
@@ -101,8 +102,16 @@ def upload_document():
 
         os.remove(file_path)
 
-        return jsonify({'result': response})
+        current_time = datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M')
+    
 
+        return jsonify({
+            'result': response,
+            'name': file_name,
+            'hash': ipfshash,
+            'timestamp': current_time,
+            'size': file_size
+        })
 # Скачивание документа
 @views.route("/download", methods=["POST"])
 def download_document():
@@ -115,8 +124,10 @@ def download_document():
     
     try:
         data = request.get_json()
-        document_hash = data.get('documentHash')
-        file_path = data.get('filePath')
+        document_hash = data.get('file_hash')
+        file_path = data.get('file_path')
+        print(f'DOCUMENT_HASH: {document_hash}')
+        print(f'DOCUMENT_FILE: {file_path}')
 
         if not document_hash:
             return jsonify({'error': 'No document hash provided'}), 400
@@ -151,7 +162,7 @@ def delete_document():
 
     try:
         data = request.get_json()
-        document_hash = data.get('documentHash')
+        document_hash = data.get('file_hash')
 
         if not document_hash:
             return jsonify({'error': 'No document hash provided'}), 400
@@ -171,7 +182,7 @@ def delete_document():
         if not tx_receipt:
             return jsonify({'error': 'Failed to delete document from blockchain'}), 500
 
-        return jsonify({'message': 'Document deleted successfully', 'txReceipt': tx_receipt}), 200
+        return jsonify({'message': 'File successfully deleted'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -226,9 +237,7 @@ def transactions():
     if not wallet_address:
         return redirect('/')
 
-    transactions = client.get_user_documents(wallet_address)
+    transactions = client.get_all_user_transactions(wallet_address)
     sorted_transactions = sorted(transactions, key=lambda x: x['timestamp'], reverse=True)
 
-    tx_list = []
-
-    return render_template('transactions.html', transactions=tx_list)
+    return render_template('transactions.html', transactions=sorted_transactions[:20])

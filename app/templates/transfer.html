@@ -20,15 +20,16 @@
             <br>
             <label for="address-input">Адрес:</label>
             <input type="text" id="address-input" placeholder="Введите адрес Ethereum">
-
+            <br>
             <button id="send-button">Отправить</button>
-
-            <div class="status">
+            <div class="status" style="display: none;">
                 <label for="status-display">Статус:</label>
                 <span id="status-display">Ожидание отправки...</span>
+                <div class="loader" id="status-loader" style="display: none;"></div>
             </div>
         </div>
     </div>
+    {% if income_docs %}
     <div class="container">
         <div class="received-documents">
             <h1>Полученные документы</h1>
@@ -47,7 +48,20 @@
                 <tbody>
                     {% for income_doc in income_docs %}
                     <tr>
-                        <td></td>
+                        <td>{% if income_doc.name.split('.')[-1].lower() == 'pdf' %}
+                            <img src="{{ url_for('static', filename='assets/pdf.png') }}" alt="PDF" width="32" height="32">
+                            {% elif income_doc.name.split('.')[-1].lower() == 'png' %}
+                            <img src="{{ url_for('static', filename='assets/png.png') }}" alt="PNG" width="32" height="32">
+                            {% elif income_doc.name.split('.')[-1].lower() == 'docs' or income_doc.name.split('.')[-1].lower() == 'docx' %}
+                            <img src="{{ url_for('static', filename='assets/docs.png') }}" alt="Docs" width="32" height="32">
+                            {% elif income_doc.name.split('.')[-1].lower() == 'txt' %}
+                            <img src="{{ url_for('static', filename='assets/txt.png') }}" alt="TXT" width="32" height="32">
+                            {% elif income_doc.name.split('.')[-1].lower() == 'xls' %}
+                            <img src="{{ url_for('static', filename='assets/xls.png') }}" alt="XLS" width="32" height="32">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='assets/default.png') }}" alt="Default" width="32" height="32">
+                            {% endif %}
+                        </td>
                         <td>{{ income_doc.name }}</td>
                         <td>{{ income_doc.hash }}</td>
                         <td>{{ income_doc.sender | shorten }}</td>
@@ -63,23 +77,31 @@
             </table>
         </div>
     </div>
-
+    {% endif %}
     <script>
         document.getElementById('send-button').addEventListener('click', async () => {
             const documentSelect = document.getElementById('document-select');
             const addressInput = document.getElementById('address-input');
             const statusDisplay = document.getElementById('status-display');
+            const statusLoader = document.getElementById('status-loader');
+            const statusContainer = document.querySelector('.status');
 
             const selectedDocument = documentSelect.value;
             const recipientAddress = addressInput.value;
-            
+
+            statusContainer.style.display = 'block';
+            statusDisplay.textContent = 'Идет отправка...';
+            statusLoader.style.display = 'inline-block';
+
             if (!selectedDocument){
                 statusDisplay.textContent = 'Пожалуйста, выберите документ.';
+                statusLoader.style.display = 'none';
                 return; 
             }
 
             if (!recipientAddress) {
                 statusDisplay.textContent = 'Пожалуйста, введите адрес.';
+                statusLoader.style.display = 'none';
                 return;
             }
 
@@ -99,14 +121,24 @@
 
                 if (response.ok) {
                     statusDisplay.textContent = 'Документ успешно отправлен.';
+                    statusDisplay.style.color = 'green';
+                    setTimeout(() => {
+                        statusContainer.classList.add('fade-out');
+                        setTimeout(() => {
+                            statusContainer.style.display = 'none';
+                            statusContainer.classList.remove('fade-out');
+                            statusDisplay.style.color = 'black';
+                        }, 2000);
+                    }, 2000);
                 } else {
                     statusDisplay.textContent = `Ошибка: ${result.error}`;
+                    statusLoader.style.display = 'none';
                 }
             } catch (error) {
                 statusDisplay.textContent = `Ошибка: ${error.message}`;
+                statusLoader.style.display = 'none';
             }
         });
     </script>
-
 </body>
 </html>

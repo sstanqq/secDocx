@@ -15,6 +15,7 @@
                 <tr>
                     <th></th>
                     <th>Документ</th>
+                    <th>Хеш</th>
                     <th>Дата и время</th>
                     <th>Тип</th>
                     <th>Отправитель</th>
@@ -25,12 +26,24 @@
             <tbody>
                 {% for transaction in transactions %}
                 <tr>
-                    <td>{{ transaction.id }}</td>
+                    <td>{% if transaction.tr_type.lower() == 'загрузка' %}
+                        <img src="{{ url_for('static', filename='assets/file_upload.png') }}" alt="PDF" width="32" height="32">
+                        {% elif transaction.tr_type.lower().lower() == 'удаление' %}
+                        <img src="{{ url_for('static', filename='assets/file_delete.png') }}" alt="PNG" width="32" height="32">
+                        {% elif transaction.tr_type.lower().lower() == 'сохранение' %}
+                        <img src="{{ url_for('static', filename='assets/file_download.png') }}" alt="Docs" width="32" height="32">
+                        {% elif transaction.tr_type.lower().lower() == 'отправка' %}
+                        <img src="{{ url_for('static', filename='assets/file_send.png') }}" alt="TXT" width="32" height="32">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='assets/default.png') }}" alt="Default" width="32" height="32">
+                        {% endif %}
+                    </td>
                     <td>{{ transaction.name }}</td>
+                    <td>{{ transaction.hash | shorten }}</td>
                     <td>{{ transaction.timestamp }}</td>
-                    <td>{{ transaction.tx_type }}</td>
+                    <td>{{ transaction.tr_type }}</td>
                     <td>{{ transaction.sender | shorten }}</td>
-                    <td>{{ transaction.reciever | shorten }}</td>
+                    <td>{{ transaction.recipient | shorten }}</td>
                     <td>{{ transaction.status }}</td>
                 </tr>
                 {% endfor %}

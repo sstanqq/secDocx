@@ -15,13 +15,25 @@ contract DocumentStorage {
         uint size;
     }
 
+    struct Transaction {
+        string name;
+        string hash;
+        address sender;
+        address recipient;
+        TransactionType txType;
+        uint timestamp;
+        bool status;
+    }
+
     mapping(string => Document) private documents;
     mapping(address => string[]) private userDocuments;
+    mapping(address => Transaction[]) private userTransactions;
     string[] private allDocuments; // Массив всех документов
 
     event DocumentUploaded(string hash, address indexed owner, string docName, uint timestamp);
     event DocumentSent(string hash, address indexed owner, address indexed recipient);
     event DocumentDeleted(string hash, address indexed owner);
+    event TransactionRecorded(address indexed user, string hash, TransactionType txType, uint timestamp);
 
     function uploadDocument(string memory hash, string memory docName, uint size) public {
         require(bytes(hash).length > 0, "Hash cannot be empty");
@@ -42,7 +54,18 @@ contract DocumentStorage {
         userDocuments[msg.sender].push(hash);
         allDocuments.push(hash);
 
+        userTransactions[msg.sender].push(Transaction({
+            name: docName,
+            hash: hash,
+            sender: msg.sender,
+            recipient: address(0),
+            txType: TransactionType.Upload,
+            timestamp: now,
+            status: true
+        }));
+
         emit DocumentUploaded(hash, msg.sender, docName, now);
+        emit TransactionRecorded(msg.sender, hash, TransactionType.Upload, now);
     }
 
     function sendDocument(string memory hash, address recipient) public {
@@ -55,12 +78,44 @@ contract DocumentStorage {
         documents[hash].transactionType = TransactionType.Send;
         documents[hash].isSent = true;
 
+        // Добавляем транзакцию только один раз для отправителя и получателя
+        userTransactions[msg.sender].push(Transaction({
+            name: documents[hash].docName,
+            hash: hash,
+            sender: msg.sender,
+            recipient: recipient,
+            txType: TransactionType.Send,
+            timestamp: now,
+            status: true
+        }));
+
+        userTransactions[recipient].push(Transaction({
+            name: documents[hash].docName,
+            hash: hash,
+            sender: msg.sender,
+            recipient: recipient,
+            txType: TransactionType.Send,
+            timestamp: now,
+            status: true
+        }));
+
         emit DocumentSent(hash, msg.sender, recipient);
+        emit TransactionRecorded(msg.sender, hash, TransactionType.Send, now);
     }
 
     function deleteDocument(string memory hash) public {
         require(bytes(hash).length > 0, "Hash cannot be empty");
         require(documents[hash].owner == msg.sender, "You are not the owner of this document");
+
+        userTransactions[msg.sender].push(Transaction({
+            name: documents[hash].docName,
+            hash: hash,
+            sender: msg.sender,
+            recipient: address(0),
+            txType: TransactionType.Delete,
+            timestamp: now,
+            status: true
+        }));
 
         delete documents[hash];
 
@@ -75,6 +130,7 @@ contract DocumentStorage {
         }
 
         emit DocumentDeleted(hash, msg.sender);
+        emit TransactionRecorded(msg.sender, hash, TransactionType.Delete, now);
     }
 
     function getDocumentOwner(string memory hash) public view returns (address) {
@@ -125,6 +181,40 @@ contract DocumentStorage {
             }
         }
         return receivedDocs;
+    }
+
+    function getAllUserTransactions() public view returns (Transaction[] memory) {
+        uint count = userTransactions[msg.sender].length;
+        for (uint i = 0; i < allDocuments.length; i++) {
+            if (documents[allDocuments[i]].recipient == msg.sender) {
+                count++;
+            }
+        }
+
+        Transaction[] memory allTransactions = new Transaction[](count);
+        uint index = 0;
+
+        for (uint i = 0; i < userTransactions[msg.sender].length; i++) {
+            allTransactions[index] = userTransactions[msg.sender][i];
+            index++;
+        }
+
+        for (uint i = 0; i < allDocuments.length; i++) {
+            if (documents[allDocuments[i]].recipient == msg.sender) {
+                allTransactions[index] = Transaction({
+                    name: documents[allDocuments[i]].docName,
+                    hash: documents[allDocuments[i]].hash,
+                    sender: documents[allDocuments[i]].owner,
+                    recipient: msg.sender,
+                    txType: documents[allDocuments[i]].transactionType,
+                    timestamp: documents[allDocuments[i]].timestamp,
+                    status: documents[allDocuments[i]].isSent
+                });
+                index++;
+            }
+        }
+
+        return allTransactions;
     }
 
 }
