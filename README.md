@@ -5,4 +5,4 @@ Web application for crypto-secure decentralized document flow
 - IPFS
 - web3
 - flask
-- Digital signature EdDSA, Curve25519
+- Solidity
