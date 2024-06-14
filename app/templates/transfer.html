@@ -10,14 +10,12 @@
     {% include "_header.html" %}
     <div class="container">
         <div class="send-document">
-            <h1>Выбор документа и адресата для отправки</h2>
+            <h1>Выбор документа и адресата для отправки</h1>
             <label for="document-select">Выберите документ:</label>
             <select id="document-select">
-                <option value="Document1.pdf">Document1.pdf</option>
-                <option value="Document2.pdf">Document2.pdf</option>
-                <option value="Секретно.pdf">Секретно.pdf</option>
-                <option value="Реферат.docx">Реферат.docx</option>
-                <option value="Доклад.docx">Доклад.docx</option>
+                {% for user_doc in user_docs %}
+                <option value="{{ user_doc.hash }}">{{ user_doc.name }}</option>
+                {% endfor %}
             </select>
             <br>
             <label for="address-input">Адрес:</label>
@@ -33,19 +31,82 @@
     </div>
     <div class="container">
         <div class="received-documents">
-            <h1>Полученные документы</h2>
+            <h1>Полученные документы</h1>
             <table>
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Имя файла</th>
-                        <th>Адрес отправителя</th>
                         <th>Хеш</th>
+                        <th>Отправитель</th>
+                        <th>Размер</th>
                         <th>Время отправления</th>
-                        <th>Действия</th>
+                        <th></th>
                     </tr>
                 </thead>
+                <tbody>
+                    {% for income_doc in income_docs %}
+                    <tr>
+                        <td></td>
+                        <td>{{ income_doc.name }}</td>
+                        <td>{{ income_doc.hash }}</td>
+                        <td>{{ income_doc.sender | shorten }}</td>
+                        <td>{{ income_doc.size | format_size }}</td>
+                        <td>{{ income_doc.timestamp }}</td>
+                        <td>
+                            <button class="delete-document-btn" data-hash="{{ income_doc.hash }}">Отклонить</button>
+                            <button class="download-document-btn" data-hash="{{ income_doc.hash }}">Сохранить</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
+
+    <script>
+        document.getElementById('send-button').addEventListener('click', async () => {
+            const documentSelect = document.getElementById('document-select');
+            const addressInput = document.getElementById('address-input');
+            const statusDisplay = document.getElementById('status-display');
+
+            const selectedDocument = documentSelect.value;
+            const recipientAddress = addressInput.value;
+            
+            if (!selectedDocument){
+                statusDisplay.textContent = 'Пожалуйста, выберите документ.';
+                return; 
+            }
+
+            if (!recipientAddress) {
+                statusDisplay.textContent = 'Пожалуйста, введите адрес.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        documentHash: selectedDocument,
+                        recipientAddress: recipientAddress
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusDisplay.textContent = 'Документ успешно отправлен.';
+                } else {
+                    statusDisplay.textContent = `Ошибка: ${result.error}`;
+                }
+            } catch (error) {
+                statusDisplay.textContent = `Ошибка: ${error.message}`;
+            }
+        });
+    </script>
+
 </body>
 </html>

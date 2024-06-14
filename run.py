@@ -18,6 +18,14 @@ def shorten_filter(s):
         return s
     return s[:4] + '...' + s[-5:]
 
+@myapp.template_filter('format_size')
+def format_size(value):
+    for unit in ['', 'КБ', 'МБ', 'ГБ', 'ТБ']:
+        if value < 1024.0:
+            return f"{value:.2f} {unit}"
+        value /= 1024.0
+
+
 myapp.register_blueprint(views, url_prefix='/')
 
 print(f'Connection to Ganache: {check_connection()}\n')
